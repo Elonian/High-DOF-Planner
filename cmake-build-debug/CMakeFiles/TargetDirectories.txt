@@ -1,0 +1,4 @@
+/home/itamar/work/teaching/16782-Fall-2024/16782-HW2/code/cmake-build-debug/CMakeFiles/planner.dir
+/home/itamar/work/teaching/16782-Fall-2024/16782-HW2/code/cmake-build-debug/CMakeFiles/verifier.dir
+/home/itamar/work/teaching/16782-Fall-2024/16782-HW2/code/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/itamar/work/teaching/16782-Fall-2024/16782-HW2/code/cmake-build-debug/CMakeFiles/rebuild_cache.dir

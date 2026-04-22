@@ -1,0 +1,1 @@
+/usr/bin/c++ -O3 -DNDEBUG -Wl,--dependency-file=CMakeFiles/verifier.dir/link.d CMakeFiles/verifier.dir/src/verifier.cpp.o -o verifier

@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"/mntdatalora/src/High-DOF-Arm-Planner/build/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

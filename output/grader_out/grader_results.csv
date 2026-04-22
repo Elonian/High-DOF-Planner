@@ -1,0 +1,9 @@
+planner,mapName,problemIndex,numSteps,cost,timespent,success
+0,map1.txt,0,77,12.324106307179585,0.2704118499532342,True
+0,map2.txt,1,-1,-1,0.2704118499532342,False
+1,map1.txt,0,-1,-1,0.2704118499532342,False
+1,map2.txt,1,-1,-1,0.2704118499532342,False
+2,map1.txt,0,-1,-1,0.2704118499532342,False
+2,map2.txt,1,-1,-1,0.2704118499532342,False
+3,map1.txt,0,-1,-1,0.2704118499532342,False
+3,map2.txt,1,-1,-1,0.2704118499532342,False

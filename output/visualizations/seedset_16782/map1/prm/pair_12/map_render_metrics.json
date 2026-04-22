@@ -1,0 +1,19 @@
+{
+  "solution": "/mntdatalora/src/High-DOF-Arm-Planner/output/report_benchmark/seedset_16782/map1/prm/pair_12_path.txt",
+  "map": "/mntdatalora/src/High-DOF-Arm-Planner/maps/map1.txt",
+  "waypoints": 54,
+  "dofs": 5,
+  "total_cost": 10.044328716767174,
+  "max_step_cost": 0.18951563621999945,
+  "mean_step_cost": 0.18951563616541836,
+  "stats": {
+    "vertices_generated": "2",
+    "first_solution_time": "0",
+    "used_fallback": "0",
+    "plan_waypoints": "54"
+  },
+  "outputs": {
+    "map_motion_gif": "map_motion.gif",
+    "map_final_png": "map_final.png"
+  }
+}
