@@ -252,7 +252,7 @@ A configuration is valid only if every link segment lies inside the map and does
 not pass through an occupied cell:
 
 $$
-q\in\mathcal{C}_{free}\iff \operatorname{segment}(p_{i-1},p_i)\subset\mathcal{W}_{free},\quad i=1,\ldots,n
+q\in\mathcal{C}_{free}\iff \mathrm{segment}(p_{i-1},p_i)\subset\mathcal{W}_{free},\quad i=1,\ldots,n
 $$
 
 The segment test rasterizes each link with a Bresenham style grid traversal. In
@@ -270,7 +270,7 @@ Because angles wrap at `2*pi`, Euclidean subtraction is not enough. The signed
 shortest angular difference from angle `a` to angle `b` is:
 
 $$
-\Delta(a,b)=\operatorname{wrap}_{[-\pi,\pi]}(b-a)
+\Delta(a,b)=\mathrm{wrap}_{[-\pi,\pi]}(b-a)
 $$
 
 The joint space distance used for nearest neighbor search is:
@@ -300,7 +300,7 @@ A local edge between two configurations is checked by interpolating on the
 shortest wrapped angular arc:
 
 $$
-q_i(t)=\operatorname{wrap}(q_i+t\Delta(q_i,r_i)),\quad t\in[0,1]
+q_i(t)=\mathrm{wrap}(q_i+t\Delta(q_i,r_i)),\quad t\in[0,1]
 $$
 
 The number of collision samples along an edge is:
@@ -388,7 +388,7 @@ $$
 The nearest neighbor is:
 
 $$
-q_{near}=\underset{v\in V}{\operatorname{argmin}}\ d(v,q_{rand})
+q_{near}=\mathrm{argmin}_{v\in V}\ d(v,q_{rand})
 $$
 
 The steering operation is:
@@ -402,7 +402,7 @@ $$
 Otherwise it steers by one step:
 
 $$
-q_{new}=\operatorname{interpolate}(q_{near},q_{rand},\eta/d(q_{near},q_{rand}))
+q_{new}=\mathrm{interpolate}(q_{near},q_{rand},\eta/d(q_{near},q_{rand}))
 $$
 
 The implementation uses:
@@ -414,19 +414,19 @@ $$
 The new node is inserted only when:
 
 $$
-\operatorname{edge}(q_{near},q_{new})\subset\mathcal{C}_{free}
+\mathrm{edge}(q_{near},q_{new})\subset\mathcal{C}_{free}
 $$
 
 The planner also uses a goal bias:
 
 $$
-\Pr(q_{rand}=q_{goal})=0.22
+P(q_{rand}=q_{goal})=0.22
 $$
 
 All other samples are drawn uniformly from the configuration space:
 
 $$
-q_{rand}\sim \operatorname{Uniform}(\mathcal{C})
+q_{rand}\sim \mathrm{Uniform}(\mathcal{C})
 $$
 
 Goal bias is important in high dimensional spaces because pure uniform sampling
@@ -458,7 +458,7 @@ final arm motion for all 20 corrected `map2` pairs.
 Rapidly exploring Random Tree Connect (RRT Connect) grows two trees:
 
 $$
-\operatorname{root}(T_a)=q_{start},\quad \operatorname{root}(T_b)=q_{goal}
+\mathrm{root}(T_a)=q_{start},\quad \mathrm{root}(T_b)=q_{goal}
 $$
 
 Each iteration samples a valid configuration, extends one tree toward the sample,
@@ -466,14 +466,14 @@ and then tries to connect the opposite tree all the way to the newly reached
 state. The extend step is:
 
 $$
-\operatorname{Extend}(T,q_{target})\rightarrow\{TRAPPED,ADVANCED,REACHED\}
+\mathrm{Extend}(T,q_{target})\rightarrow\{TRAPPED,ADVANCED,REACHED\}
 $$
 
 The connect step repeatedly applies `Extend` until either an obstacle blocks the
 motion or the target is reached:
 
 $$
-\operatorname{Connect}(T,q)=REACHED
+\mathrm{Connect}(T,q)=REACHED
 $$
 
 Otherwise, the connect step returns `TRAPPED`.
@@ -490,7 +490,7 @@ regions connected by a narrow free corridor. When the two trees meet, the final
 path is:
 
 $$
-P=\operatorname{path}(T_{start},q_{meet})\oplus \operatorname{reverse}(\operatorname{path}(T_{goal},q_{meet}))
+P=\mathrm{path}(T_{start},q_{meet})\oplus \mathrm{reverse}(\mathrm{path}(T_{goal},q_{meet}))
 $$
 
 Rapidly exploring Random Tree Connect (RRT Connect) is usually the fastest
@@ -525,7 +525,7 @@ For a new configuration `q_new`, Rapidly exploring Random Tree Star (RRT*) first
 finds nearby nodes:
 
 $$
-\operatorname{Near}(q_{new})=\{v\in V\mid d(v,q_{new})\le r_n\}
+\mathrm{Near}(q_{new})=\{v\in V\mid d(v,q_{new})\le r_n\}
 $$
 
 The radius follows the standard shrinking neighborhood shape:
@@ -544,13 +544,13 @@ $$
 The parent is selected by minimizing cost to come plus local edge cost:
 
 $$
-\operatorname{parent}(q_{new})=\underset{v\in \operatorname{Near}(q_{new})}{\operatorname{argmin}}\left(g(v)+c(v,q_{new})\right)
+\mathrm{parent}(q_{new})=\mathrm{argmin}_{v\in \mathrm{Near}(q_{new})}\left(g(v)+c(v,q_{new})\right)
 $$
 
 subject to:
 
 $$
-\operatorname{edge}(v,q_{new})\subset\mathcal{C}_{free}
+\mathrm{edge}(v,q_{new})\subset\mathcal{C}_{free}
 $$
 
 The edge cost is:
@@ -618,7 +618,7 @@ $$
 The sampler then adds valid random configurations:
 
 $$
-q\sim \operatorname{Uniform}([0,2\pi)^n),\quad q\in\mathcal{C}_{free}
+q\sim \mathrm{Uniform}([0,2\pi)^n),\quad q\in\mathcal{C}_{free}
 $$
 
 For each new node, Probabilistic Roadmap (PRM) sorts all other nodes by wrapped
@@ -631,7 +631,7 @@ $$
 An undirected edge is inserted when:
 
 $$
-\operatorname{edge}(q,v)\subset\mathcal{C}_{free}
+\mathrm{edge}(q,v)\subset\mathcal{C}_{free}
 $$
 
 The implementation uses:
@@ -656,7 +656,7 @@ $$
 The shortest path satisfies:
 
 $$
-P^*=\underset{P:q_{start}\rightarrow q_{goal}}{\operatorname{argmin}}\sum_{(a,b)\in P}w(a,b)
+P^*=\mathrm{argmin}_{P:q_{start}\rightarrow q_{goal}}\sum_{(a,b)\in P}w(a,b)
 $$
 
 Probabilistic Roadmap (PRM) can produce good paths because it explicitly
