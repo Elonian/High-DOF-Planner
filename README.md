@@ -143,27 +143,26 @@ the binary by CMake.
 Each map is a 2D occupancy grid:
 
 $$
-\mathcal{W} = \{(x,y): 0 \le x < X,\; 0 \le y < Y\}.
+\mathcal{W}=\{(x,y)\mid 0\le x<X,\ 0\le y<Y\}
 $$
 
 Each grid cell stores either free space or obstacle space:
 
 $$
-M(x,y) \in \{0,1\}.
+M(x,y)\in\{0,1\}
 $$
 
 The free workspace is:
 
 $$
-\mathcal{W}_{free}
-= \{(x,y)\in\mathcal{W}: M(x,y)=0\}.
+\mathcal{W}_{free}=\{(x,y)\in\mathcal{W}\mid M(x,y)=0\}
 $$
 
 The map loader, planner, verifier, benchmark sampler, and renderer all use the
 same row major visual indexing convention:
 
 $$
-idx(x,y) = yX + x.
+idx(x,y)=yX+x
 $$
 
 This convention matters because the black wall cells shown in the rendered
@@ -176,25 +175,25 @@ For an arm with `n` degrees of freedom, a configuration is a vector of joint
 angles:
 
 $$
-q = [q_1,q_2,\ldots,q_n]^T.
+q=[q_1,q_2,\ldots,q_n]^T
 $$
 
 Each angle is periodic:
 
 $$
-q_i \equiv q_i + 2\pi k,\quad k\in\mathbb{Z}.
+q_i\equiv q_i+2\pi k,\quad k\in\mathbb{Z}
 $$
 
 The implementation normalizes sampled states into:
 
 $$
-q_i \in [0,2\pi).
+q_i\in[0,2\pi)
 $$
 
 The configuration space is therefore the n dimensional torus:
 
 $$
-\mathcal{C} = S^1 \times S^1 \times \cdots \times S^1.
+\mathcal{C}=S^1\times S^1\times\cdots\times S^1
 $$
 
 The planner receives exact start and goal arrays from the command line. Internally
@@ -202,7 +201,7 @@ it may normalize equivalent angles for planning, but the emitted path is forced
 to begin and end with the exact input values:
 
 $$
-P_0 = q_{start},\quad P_{m-1}=q_{goal}.
+P_0=q_{start},\quad P_{m-1}=q_{goal}
 $$
 
 ### Forward Kinematics
@@ -210,43 +209,36 @@ $$
 The arm base is fixed at the top center of the map:
 
 $$
-p_0 = (X/2,0).
+p_0=(X/2,0)
 $$
 
 Every link has length:
 
 $$
-L = 10 \text{ cells}.
+L=10
 $$
 
 The project convention defines each joint angle as an absolute clockwise
 angle from the positive x axis. The endpoint of link `i` is:
 
 $$
-p_i =
-p_{i-1}
-+
-L
-\begin{bmatrix}
-\cos(2\pi - q_i) \\
--\sin(2\pi - q_i)
-\end{bmatrix}.
+p_i=p_{i-1}+L(\cos(2\pi-q_i),-\sin(2\pi-q_i))
 $$
 
 Equivalently, if:
 
 $$
-p_i = (x_i,y_i),
+p_i=(x_i,y_i)
 $$
 
 then:
 
 $$
-x_i = x_{i-1} + L\cos(2\pi-q_i),
+x_i=x_{i-1}+L\cos(2\pi-q_i)
 $$
 
 $$
-y_i = y_{i-1} - L\sin(2\pi-q_i).
+y_i=y_{i-1}-L\sin(2\pi-q_i)
 $$
 
 This is not a relative chain convention where link `i` is rotated by the sum of
@@ -260,10 +252,7 @@ A configuration is valid only if every link segment lies inside the map and does
 not pass through an occupied cell:
 
 $$
-q \in \mathcal{C}_{free}
-\iff
-\forall i\in\{1,\ldots,n\},\;
-\overline{p_{i-1}p_i}\subset\mathcal{W}_{free}.
+q\in\mathcal{C}_{free}\iff \operatorname{segment}(p_{i-1},p_i)\subset\mathcal{W}_{free},\quad i=1,\ldots,n
 $$
 
 The segment test rasterizes each link with a Bresenham style grid traversal. In
@@ -281,37 +270,25 @@ Because angles wrap at `2*pi`, Euclidean subtraction is not enough. The signed
 shortest angular difference from angle `a` to angle `b` is:
 
 $$
-\Delta(a,b)
-=
-wrap_{[-\pi,\pi]}(b-a).
+\Delta(a,b)=\operatorname{wrap}_{[-\pi,\pi]}(b-a)
 $$
 
 The joint space distance used for nearest neighbor search is:
 
 $$
-d(q,r)
-=
-\left(
-\sum_{i=1}^{n} \Delta(q_i,r_i)^2
-\right)^{1/2}.
+d(q,r)=\sqrt{\sum_{i=1}^{n}\Delta(q_i,r_i)^2}
 $$
 
 The maximum per joint displacement used for interpolation resolution is:
 
 $$
-d_{\infty}(q,r)
-=
-\max_i |\Delta(q_i,r_i)|.
+d_{\infty}(q,r)=\max_i|\Delta(q_i,r_i)|
 $$
 
 The reported path quality cost is the sum of absolute wrapped joint motion:
 
 $$
-J(P)
-=
-\sum_{k=0}^{m-2}
-\sum_{i=1}^{n}
-|\Delta(P_{k,i},P_{k+1,i})|.
+J(P)=\sum_{k=0}^{m-2}\sum_{i=1}^{n}|\Delta(P_{k,i},P_{k+1,i})|
 $$
 
 This cost favors shorter total actuator motion, not necessarily shorter
@@ -323,26 +300,19 @@ A local edge between two configurations is checked by interpolating on the
 shortest wrapped angular arc:
 
 $$
-q(t)_i = wrap(q_i + t\Delta(q_i,r_i)),\quad t\in[0,1].
+q_i(t)=\operatorname{wrap}(q_i+t\Delta(q_i,r_i)),\quad t\in[0,1]
 $$
 
 The number of collision samples along an edge is:
 
 $$
-N =
-\max\left(
-1,\left\lceil
-\frac{d_{\infty}(q,r)}{\pi/55}
-\right\rceil
-\right).
+N=\max\left(1,\left\lceil\frac{d_{\infty}(q,r)}{\pi/55}\right\rceil\right)
 $$
 
 The edge is valid if:
 
 $$
-q(j/N)\in\mathcal{C}_{free}
-\quad
-\forall j\in\{0,1,\ldots,N\}.
+q(j/N)\in\mathcal{C}_{free},\quad j=0,1,\ldots,N
 $$
 
 The same resolution is used again when a sparse planner path is densified for
@@ -394,9 +364,7 @@ The shortcut smoother repeatedly samples two path indices `a < b`. If the direct
 edge between `P_a` and `P_b` is valid, the interior subpath is removed:
 
 $$
-[P_0,\ldots,P_a,P_{a+1},\ldots,P_{b-1},P_b,\ldots]
-\rightarrow
-[P_0,\ldots,P_a,P_b,\ldots].
+[P_0,\ldots,P_a,P_{a+1},\ldots,P_{b-1},P_b,\ldots]\rightarrow[P_0,\ldots,P_a,P_b,\ldots]
 $$
 
 This is a pragmatic smoothing step. It does not prove optimality, but it reduces
@@ -414,48 +382,51 @@ tree node, and extends toward the sample by a bounded step.
 The tree is:
 
 $$
-T=(V,E),\quad q_{start}\in V.
+T=(V,E),\quad q_{start}\in V
 $$
 
 The nearest neighbor is:
 
 $$
-q_{near}
-=
-\arg\min_{v\in V} d(v,q_{rand}).
+q_{near}=\underset{v\in V}{\operatorname{argmin}}\ d(v,q_{rand})
 $$
 
 The steering operation is:
 
+If the sample is within one step, the planner uses:
+
 $$
-q_{new}
-=
-\begin{cases}
-q_{rand}, & d(q_{near},q_{rand})\le \eta,\\
-interpolate(q_{near},q_{rand},\eta/d(q_{near},q_{rand})), & otherwise.
-\end{cases}
+q_{new}=q_{rand},\quad d(q_{near},q_{rand})\le\eta
+$$
+
+Otherwise it steers by one step:
+
+$$
+q_{new}=\operatorname{interpolate}(q_{near},q_{rand},\eta/d(q_{near},q_{rand}))
 $$
 
 The implementation uses:
 
 $$
-\eta = 0.42.
+\eta=0.42
 $$
 
 The new node is inserted only when:
 
 $$
-edge(q_{near},q_{new}) \subset \mathcal{C}_{free}.
+\operatorname{edge}(q_{near},q_{new})\subset\mathcal{C}_{free}
 $$
 
 The planner also uses a goal bias:
 
 $$
-q_{rand} =
-\begin{cases}
-q_{goal}, & \text{with probability } 0.22,\\
-sampleUniform(\mathcal{C}), & \text{otherwise}.
-\end{cases}
+\Pr(q_{rand}=q_{goal})=0.22
+$$
+
+All other samples are drawn uniformly from the configuration space:
+
+$$
+q_{rand}\sim \operatorname{Uniform}(\mathcal{C})
 $$
 
 Goal bias is important in high dimensional spaces because pure uniform sampling
@@ -487,9 +458,7 @@ final arm motion for all 20 corrected `map2` pairs.
 Rapidly exploring Random Tree Connect (RRT Connect) grows two trees:
 
 $$
-T_a \text{ rooted at } q_{start},
-\quad
-T_b \text{ rooted at } q_{goal}.
+\operatorname{root}(T_a)=q_{start},\quad \operatorname{root}(T_b)=q_{goal}
 $$
 
 Each iteration samples a valid configuration, extends one tree toward the sample,
@@ -497,26 +466,22 @@ and then tries to connect the opposite tree all the way to the newly reached
 state. The extend step is:
 
 $$
-Extend(T,q_{target}) \rightarrow
-\{TRAPPED, ADVANCED, REACHED\}.
+\operatorname{Extend}(T,q_{target})\rightarrow\{TRAPPED,ADVANCED,REACHED\}
 $$
 
 The connect step repeatedly applies `Extend` until either an obstacle blocks the
 motion or the target is reached:
 
 $$
-Connect(T,q)
-=
-\begin{cases}
-REACHED, & \exists \text{ finite sequence of valid extensions to } q,\\
-TRAPPED, & \text{otherwise}.
-\end{cases}
+\operatorname{Connect}(T,q)=REACHED
 $$
+
+Otherwise, the connect step returns `TRAPPED`.
 
 The implementation uses:
 
 $$
-\eta = 0.48.
+\eta=0.48
 $$
 
 After every iteration, the two trees swap roles. This balances exploration from
@@ -525,10 +490,7 @@ regions connected by a narrow free corridor. When the two trees meet, the final
 path is:
 
 $$
-P =
-path(T_{start},q_{meet})
-\oplus
-reverse(path(T_{goal},q_{meet})).
+P=\operatorname{path}(T_{start},q_{meet})\oplus \operatorname{reverse}(\operatorname{path}(T_{goal},q_{meet}))
 $$
 
 Rapidly exploring Random Tree Connect (RRT Connect) is usually the fastest
@@ -563,55 +525,45 @@ For a new configuration `q_new`, Rapidly exploring Random Tree Star (RRT*) first
 finds nearby nodes:
 
 $$
-Near(q_{new})
-=
-\{v\in V: d(v,q_{new})\le r_n\}.
+\operatorname{Near}(q_{new})=\{v\in V\mid d(v,q_{new})\le r_n\}
 $$
 
 The radius follows the standard shrinking neighborhood shape:
 
 $$
-r_n
-=
-\gamma
-\left(\frac{\log(n+1)}{n}\right)^{1/d},
+r_n=\gamma\left(\frac{\log(n+1)}{n}\right)^{1/d}
 $$
 
 where `d` is the number of joints. In code this is clamped to avoid a radius
 that is too small or too large for the project scale maps:
 
 $$
-r_n \in [1.45\eta,\;1.65].
+r_n\in[1.45\eta,1.65]
 $$
 
 The parent is selected by minimizing cost to come plus local edge cost:
 
 $$
-parent(q_{new})
-=
-\arg\min_{v\in Near(q_{new})}
-\left(g(v)+c(v,q_{new})\right),
+\operatorname{parent}(q_{new})=\underset{v\in \operatorname{Near}(q_{new})}{\operatorname{argmin}}\left(g(v)+c(v,q_{new})\right)
 $$
 
 subject to:
 
 $$
-edge(v,q_{new})\subset\mathcal{C}_{free}.
+\operatorname{edge}(v,q_{new})\subset\mathcal{C}_{free}
 $$
 
 The edge cost is:
 
 $$
-c(a,b)
-=
-\sum_i |\Delta(a_i,b_i)|.
+c(a,b)=\sum_i|\Delta(a_i,b_i)|
 $$
 
 After inserting `q_new`, Rapidly exploring Random Tree Star (RRT*) tries to
 rewire each nearby node through the new node:
 
 $$
-g(q_{new}) + c(q_{new},v) < g(v).
+g(q_{new})+c(q_{new},v)<g(v)
 $$
 
 If the inequality holds and the edge is collision free, `v` changes parent. The
@@ -654,62 +606,57 @@ roadmap is not tied to a single query tree shape.
 The roadmap is:
 
 $$
-G=(V,E).
+G=(V,E)
 $$
 
 The initial vertices are:
 
 $$
-V = \{q_{start},q_{goal}\}.
+V=\{q_{start},q_{goal}\}
 $$
 
 The sampler then adds valid random configurations:
 
 $$
-q \sim Uniform([0,2\pi)^n),
-\quad
-q\in\mathcal{C}_{free}.
+q\sim \operatorname{Uniform}([0,2\pi)^n),\quad q\in\mathcal{C}_{free}
 $$
 
 For each new node, Probabilistic Roadmap (PRM) sorts all other nodes by wrapped
 joint space distance and tries to connect the nearest `k` nodes:
 
 $$
-N_k(q)=\text{k nearest vertices under } d(q,\cdot).
+N_k(q)=\{v_1,\ldots,v_k\}
 $$
 
 An undirected edge is inserted when:
 
 $$
-edge(q,v)\subset\mathcal{C}_{free}.
+\operatorname{edge}(q,v)\subset\mathcal{C}_{free}
 $$
 
 The implementation uses:
 
 $$
-k = \max(12,\min(28,6+2n)).
+k=\max(12,\min(28,6+2n))
 $$
 
 The target number of random samples is:
 
 $$
-900 + 220n.
+900+220n
 $$
 
 After building the roadmap, Probabilistic Roadmap (PRM) runs Dijkstra's
 algorithm with edge weights:
 
 $$
-w(a,b)=\sum_i|\Delta(a_i,b_i)|.
+w(a,b)=\sum_i|\Delta(a_i,b_i)|
 $$
 
 The shortest path satisfies:
 
 $$
-P^*
-=
-\arg\min_{P:q_{start}\rightarrow q_{goal}}
-\sum_{(a,b)\in P} w(a,b).
+P^*=\underset{P:q_{start}\rightarrow q_{goal}}{\operatorname{argmin}}\sum_{(a,b)\in P}w(a,b)
 $$
 
 Probabilistic Roadmap (PRM) can produce good paths because it explicitly
@@ -759,9 +706,7 @@ For each map, it performs the following pipeline:
 The pair score is:
 
 $$
-S(q_s,q_g)
-=
-J([q_s,q_g]) + 0.035\,\|ee(q_s)-ee(q_g)\|_2.
+S(q_s,q_g)=J([q_s,q_g])+0.035\|ee(q_s)-ee(q_g)\|_2
 $$
 
 Here `ee(q)` is the end effector position from forward kinematics. The first
